@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BlinkBasket · Electronic City</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+    body {
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+    .app {
+      max-width: 480px;
+      width: 100%;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 95vh;
+      max-height: 850px;
+    }
+    /* header */
+    .header {
+      background: #0c831f; /* blinkit green */
+      color: white;
+      padding: 16px 18px;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .location {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      border-radius: 40px;
+      backdrop-filter: blur(4px);
+    }
+    .location span {
+      font-size: 1.2rem;
+    }
+    .cart-icon {
+      background: rgba(255,255,255,0.25);
+      border-radius: 50px;
+      padding: 8px 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .cart-icon:hover { background: rgba(255,255,255,0.4); }
+    .search-bar {
+      background: white;
+      border-radius: 40px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: #666;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .search-bar span { font-size: 1.2rem; }
+    /* delivery tag */
+    .delivery-tag {
+      background: #fff3e0;
+      color: #b85e00;
+      padding: 12px 18px;
+      margin: 8px 18px 0;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 5px solid #ff9800;
+    }
+    .delivery-tag i { font-style: normal; font-size: 1.2rem; }
+    /* main scroll area */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px 20px;
+      scrollbar-width: thin;
+      scrollbar-color: #ccc #f1f1f1;
+    }
+    .scroll-area::-webkit-scrollbar { width: 4px; }
+    .scroll-area::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+    /* categories */
+    .categories {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 8px 2px 16px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .categories::-webkit-scrollbar { display: none; }
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 70px;
+      cursor: pointer;
+    }
+    .cat-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      background: #eef2f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .cat-item.active .cat-circle {
+      background: #0c831f;
+      color: white;
+      box-shadow: 0 6px 12px rgba(12,131,31,0.3);
+    }
+    .cat-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2d3e50;
+    }
+
+    /* product grid */
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 8px 4px 12px;
+    }
+    .section-title h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1a2a3a;
+    }
+    .section-title a {
+      font-size: 0.85rem;
+      color: #0c831f;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 20px;
+      padding: 12px 10px 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      border: 1px solid #eef1f4;
+      transition: 0.1s;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-emoji {
+      font-size: 2.6rem;
+      text-align: center;
+      margin-bottom: 6px;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 6px 0;
+    }
+    .product-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1e293b;
+      margin-bottom: 2px;
+    }
+    .product-unit {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .price {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #0c831f;
+    }
+    .add-btn {
+      background: #0c831f;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 6px 14px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 4px 8px rgba(12,131,31,0.2);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .add-btn:hover { background: #0a6b19; }
+    .add-btn:active { transform: scale(0.96); }
+
+    /* footer mini cart */
+    .mini-cart {
+      background: white;
+      border-top: 1px solid #e9edf2;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom-left-radius: 32px;
+      border-bottom-right-radius: 32px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.02);
+    }
+    .cart-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .cart-count {
+      background: #0c831f;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .cart-total {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #0f172a;
+    }
+    .view-cart-btn {
+      background: #0c831f;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(12,131,31,0.3);
+      transition: 0.15s;
+    }
+    .view-cart-btn:hover { background: #0a6b19; }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      z-index: 999;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* area selector (simulated) */
+    .area-pill {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .area-pill span {
+      background: #eef2f6;
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .area-pill span.active {
+      background: #0c831f;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="top-row">
+      <div class="location">
+        <span>📍</span> Electronic City
+      </div>
+      <div class="cart-icon" id="cartIcon">
+        <span>🛒</span> <span id="headerCartCount">0</span>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span> Search for milk, bread, chips...
+    </div>
+  </div>
+
+  <!-- delivery info -->
+  <div class="delivery-tag">
+    <i>⚡</i> Delivery in 11 minutes to Electronic City Phase 1
+  </div>
+
+  <!-- scroll content -->
+  <div class="scroll-area">
+    <!-- area selection (other places) -->
+    <div class="area-pill" id="areaPill">
+      <span class="active" data-area="Electronic City">Electronic City</span>
+      <span data-area="Koramangala">Koramangala</span>
+      <span data-area="Indiranagar">Indiranagar</span>
+      <span data-area="Whitefield">Whitefield</span>
+      <span data-area="HSR Layout">HSR Layout</span>
+    </div>
+
+    <!-- categories -->
+    <div class="categories" id="categories">
+      <div class="cat-item active" data-cat="all">
+        <div class="cat-circle">🛍️</div>
+        <div class="cat-name">All</div>
+      </div>
+      <div class="cat-item" data-cat="fruits">
+        <div class="cat-circle">🍎</div>
+        <div class="cat-name">Fruits</div>
+      </div>
+      <div class="cat-item" data-cat="dairy">
+        <div class="cat-circle">🥛</div>
+        <div class="cat-name">Dairy</div>
+      </div>
+      <div class="cat-item" data-cat="snacks">
+        <div class="cat-circle">🍿</div>
+        <div class="cat-name">Snacks</div>
+      </div>
+      <div class="cat-item" data-cat="drinks">
+        <div class="cat-circle">🧃</div>
+        <div class="cat-name">Drinks</div>
+      </div>
+    </div>
+
+    <!-- product grid -->
+    <div class="section-title">
+      <h3 id="sectionHeading">Popular in Electronic City</h3>
+      <a href="#">see all</a>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <!-- footer cart -->
+  <div class="mini-cart">
+    <div class="cart-info">
+      <div class="cart-count" id="footerCartCount">0</div>
+      <div class="cart-total" id="cartTotal">₹0</div>
+    </div>
+    <button class="view-cart-btn" id="viewCartBtn">
+      🛒 View Cart
+    </button>
+  </div>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast">Added to cart</div>
+
+<script>
+  (function() {
+    // ---------- PRODUCT DATA (Bangalore local feel) ----------
+    const products = [
+      { id: 1, name: 'Nandini Milk', unit: '500 ml', price: 28, category: 'dairy', emoji: '🥛' },
+      { id: 2, name: 'Amul Butter', unit: '100 g', price: 56, category: 'dairy', emoji: '🧈' },
+      { id: 3, name: 'Farm Eggs', unit: '6 pcs', price: 45, category: 'dairy', emoji: '🥚' },
+      { id: 4, name: 'Banana (Yelakki)', unit: '6 pcs', price: 42, category: 'fruits', emoji: '🍌' },
+      { id: 5, name: 'Nagpur Orange', unit: '500 g', price: 65, category: 'fruits', emoji: '🍊' },
+      { id: 6, name: 'Pomegranate', unit: '2 pcs', price: 110, category: 'fruits', emoji: '🍎' },
+      { id: 7, name: 'Lays Magic Masala', unit: '52 g', price: 20, category: 'snacks', emoji: '🥔' },
+      { id: 8, name: 'Kurkure', unit: '90 g', price: 20, category: 'snacks', emoji: '🌽' },
+      { id: 9, name: 'Mysore Pak', unit: '250 g', price: 85, category: 'snacks', emoji: '🍬' },
+      { id: 10, name: 'Tender Coconut', unit: '1 pc', price: 50, category: 'drinks', emoji: '🥥' },
+      { id: 11, name: 'Fresh Lime Soda', unit: '300 ml', price: 35, category: 'drinks', emoji: '🍋' },
+      { id: 12, name: 'Filter Coffee Decoction', unit: '200 ml', price: 45, category: 'drinks', emoji: '☕' },
+    ];
+
+    // ---------- STATE ----------
+    let cart = {};            // { productId: quantity }
+    let currentArea = 'Electronic City';
+    let currentCategory = 'all';
+
+    // DOM refs
+    const productGrid = document.getElementById('productGrid');
+    const sectionHeading = document.getElementById('sectionHeading');
+    const headerCartCount = document.getElementById('headerCartCount');
+    const footerCartCount = document.getElementById('footerCartCount');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const toast = document.getElementById('toast');
+    const areaPill = document.getElementById('areaPill');
+    const categoriesDiv = document.getElementById('categories');
+    const cartIcon = document.getElementById('cartIcon');
+    const viewCartBtn = document.getElementById('viewCartBtn');
+
+    // ---------- HELPERS ----------
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    function getCartTotal() {
+      let total = 0;
+      for (let id in cart) {
+        const product = products.find(p => p.id == id);
+        if (product) total += product.price * cart[id];
+      }
+      return total;
+    }
+
+    function getCartItemCount() {
+      let count = 0;
+      for (let id in cart) count += cart[id];
+      return count;
+    }
+
+    function updateCartUI() {
+      const totalItems = getCartItemCount();
+      const totalPrice = getCartTotal();
+      headerCartCount.textContent = totalItems;
+      footerCartCount.textContent = totalItems;
+      cartTotalEl.textContent = `₹${totalPrice}`;
+    }
+
+    // filter products based on category
+    function getFilteredProducts() {
+      if (currentCategory === 'all') return products;
+      return products.filter(p => p.category === currentCategory);
+    }
+
+    // update heading with area name
+    function updateHeading() {
+      const areaShort = currentArea.split(' ')[0]; // Electronic, Koramangala etc.
+      if (currentCategory === 'all') {
+        sectionHeading.textContent = `Popular in ${areaShort}`;
+      } else {
+        const catName = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
+        sectionHeading.textContent = `${catName} in ${areaShort}`;
+      }
+    }
+
+    // render product grid
+    function renderProducts() {
+      const filtered = getFilteredProducts();
+      if (filtered.length === 0) {
+        productGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#94a3b8;">No items in this category</div>`;
+        return;
+      }
+      productGrid.innerHTML = filtered.map(product => {
+        const qty = cart[product.id] || 0;
+        // show quantity if in cart
+        const addButtonHtml = qty > 0
+          ? `<div style="display:flex; align-items:center; gap:6px; background:#e8f5e9; border-radius:30px; padding:2px;">
+               <button class="add-btn" data-id="${product.id}" data-action="decrease" style="padding:4px 10px; background:#0c831f;">−</button>
+               <span style="font-weight:700; color:#0c831f; min-width:20px; text-align:center;">${qty}</span>
+               <button class="add-btn" data-id="${product.id}" data-action="increase" style="padding:4px 10px; background:#0c831f;">+</button>
+             </div>`
+          : `<button class="add-btn" data-id="${product.id}" data-action="add">ADD +</button>`;
+
+        return `
+          <div class="product-card" data-id="${product.id}">
+            <div class="product-emoji">${product.emoji}</div>
+            <div class="product-name">${product.name}</div>
+            <div class="product-unit">${product.unit}</div>
+            <div class="price-row">
+              <span class="price">₹${product.price}</span>
+              ${addButtonHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // update category active state
+    function setActiveCategory(cat) {
+      document.querySelectorAll('.cat-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.cat === cat);
+      });
+    }
+
+    // update area active state
+    function setActiveArea(area) {
+      document.querySelectorAll('#areaPill span').forEach(el => {
+        el.classList.toggle('active', el.dataset.area === area);
+      });
+    }
+
+    // ---------- CART OPERATIONS ----------
+    function addToCart(productId) {
+      const id = Number(productId);
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      if (cart[id]) {
+        cart[id] += 1;
+      } else {
+        cart[id] = 1;
+      }
+      updateCartUI();
+      renderProducts(); // re-render to show quantity
+      showToast(`➕ ${product.name} added`);
+    }
+
+    function decreaseFromCart(productId) {
+      const id = Number(productId);
+      if (!cart[id]) return;
+      cart[id] -= 1;
+      if (cart[id] <= 0) {
+        delete cart[id];
+      }
+      updateCartUI();
+      renderProducts();
+      const product = products.find(p => p.id === id);
+      showToast(`➖ ${product ? product.name : 'Item'} removed`);
+    }
+
+    // ---------- EVENT DELEGATION ----------
+    productGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.add-btn');
+      if (!btn) return;
+      const productId = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (action === 'add' || action === 'increase') {
+        addToCart(productId);
+      } else if (action === 'decrease') {
+        decreaseFromCart(productId);
+      }
+    });
+
+    // Category click
+    categoriesDiv.addEventListener('click', (e) => {
+      const catItem = e.target.closest('.cat-item');
+      if (!catItem) return;
+      const cat = catItem.dataset.cat;
+      currentCategory = cat;
+      setActiveCategory(cat);
+      updateHeading();
+      renderProducts();
+    });
+
+    // Area click (simulate different Bangalore locations)
+    areaPill.addEventListener('click', (e) => {
+      const span = e.target.closest('span');
+      if (!span) return;
+      const area = span.dataset.area;
+      currentArea = area;
+      setActiveArea(area);
+      // update the location header
+      document.querySelector('.location').innerHTML = `<span>📍</span> ${area}`;
+      updateHeading();
+      showToast(`📍 Now delivering to ${area}`);
+      // optional: re-render with same products
+      renderProducts();
+    });
+
+    // Header cart icon click (shows cart summary)
+    cartIcon.addEventListener('click', () => {
+      const count = getCartItemCount();
+      const total = getCartTotal();
+      if (count === 0) {
+        showToast('🛒 Your cart is empty');
+      } else {
+        showToast(`🛒 ${count} items · ₹${total}`);
+      }
+    });
+
+    // View cart button (simulated)
+    viewCartBtn.addEventListener('click', () => {
+      const count = getCartItemCount();
+      const total = getCartTotal();
+      if (count === 0) {
+        showToast('🛒 Add items to cart first');
+      } else {
+        showToast(`✅ Checkout: ${count} items, ₹${total}. Delivery in 11 mins.`);
+      }
+    });
+
+    // ---------- INIT ----------
+    function init() {
+      renderProducts();
+      updateCartUI();
+      updateHeading();
+      setActiveCategory('all');
+      setActiveArea('Electronic City');
+    }
+
+    init();
+  })();
+</script>
+</body>
+</html>
